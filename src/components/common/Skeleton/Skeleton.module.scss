@@ -1,0 +1,44 @@
+@use '@/styles/variables' as *;
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #F0ECEE 0%,
+    #FAF8F9 50%,
+    #F0ECEE 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.tableSkeletonWrap {
+  padding: 1.5rem;
+  background: $color-surface;
+  border-radius: $radius-lg;
+}
+
+.skeletonHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $color-border;
+  margin-bottom: 1rem;
+}
+
+.skeletonRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid $color-border-subtle;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

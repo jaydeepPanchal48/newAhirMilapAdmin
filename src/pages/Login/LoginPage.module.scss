@@ -1,0 +1,355 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/responsive' as *;
+
+.loginContainer {
+  min-height: 100vh;
+  display: flex;
+  background-color: $color-bg-app;
+}
+
+// Brand Column
+.brandHeroSide {
+  flex: 1.1;
+  background: linear-gradient(135deg, #1C1217 0%, #2A151F 50%, #46111C 100%);
+  color: #FFF;
+  padding: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -20%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -15%;
+    left: -15%;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(126, 29, 43, 0.4) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  @include tablet-down {
+    display: none;
+  }
+}
+
+.brandHeroInner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.logoBadge {
+  background: rgba(255, 255, 255, 0.95);
+  display: inline-flex;
+  padding: 0.75rem 1.25rem;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  width: fit-content;
+}
+
+.brandLogo {
+  height: 42px;
+  width: auto;
+}
+
+.heroContent {
+  max-width: 540px;
+  margin: 3rem 0;
+}
+
+.taglineBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.85rem;
+  border-radius: $radius-full;
+  background: rgba(212, 175, 55, 0.2);
+  color: $color-accent-light;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  margin-bottom: 1.5rem;
+}
+
+.heroTitle {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #FFF;
+  margin-bottom: 1.25rem;
+}
+
+.heroSubtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.featurePills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.pillItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+
+  .checkIcon {
+    color: $color-accent;
+    flex-shrink: 0;
+  }
+}
+
+.portalFootnote {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1.5rem;
+}
+
+// Form Column
+.formSide {
+  flex: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+
+  @include mobile {
+    padding: 1.5rem 1rem;
+  }
+}
+
+.formCard {
+  width: 100%;
+  max-width: 440px;
+  background: $color-surface;
+  padding: 2.5rem;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-lg;
+  border: 1px solid $color-border;
+
+  @include mobile {
+    padding: 1.75rem 1.25rem;
+  }
+}
+
+.mobileLogoHeader {
+  display: none;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+
+  img {
+    height: 42px;
+  }
+
+  @include tablet-down {
+    display: flex;
+  }
+}
+
+.formHeader {
+  margin-bottom: 2rem;
+
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: $color-primary;
+    letter-spacing: 0.08em;
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+
+  .loginTitle {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $color-text-primary;
+    margin-bottom: 0.5rem;
+  }
+
+  .loginDesc {
+    font-size: 0.875rem;
+    color: $color-text-secondary;
+    line-height: 1.5;
+  }
+}
+
+.errorAlert {
+  background-color: $color-danger-bg;
+  color: $color-danger;
+  border: 1px solid $color-danger-border;
+  padding: 0.75rem 1rem;
+  border-radius: $radius-md;
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $color-text-primary;
+  }
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .forgotLink {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $color-primary;
+    transition: color $transition-fast;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.inputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .inputIcon {
+    position: absolute;
+    left: 0.875rem;
+    color: $color-text-muted;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.6875rem 2.5rem 0.6875rem 2.625rem;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    font-size: 0.9375rem;
+    background-color: $color-surface;
+    transition: all $transition-fast;
+
+    &:focus {
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba(126, 29, 43, 0.12);
+    }
+  }
+
+  .eyeBtn {
+    position: absolute;
+    right: 0.75rem;
+    color: $color-text-muted;
+    padding: 0.25rem;
+    border-radius: $radius-xs;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      color: $color-text-primary;
+    }
+  }
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: $color-text-secondary;
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    accent-color: $color-primary;
+    cursor: pointer;
+  }
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.9375rem;
+  margin-top: 0.5rem;
+}
+
+.btnSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.quickTip {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: #FAF8F9;
+  border: 1px dashed $color-border;
+  border-radius: $radius-md;
+  font-size: 0.75rem;
+  color: $color-text-secondary;
+  text-align: center;
+
+  code {
+    background: #FFF;
+    padding: 0.15rem 0.35rem;
+    border-radius: $radius-xs;
+    border: 1px solid $color-border;
+    font-weight: 600;
+    color: $color-primary;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

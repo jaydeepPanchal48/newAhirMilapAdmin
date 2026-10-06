@@ -1,0 +1,182 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/responsive' as *;
+
+.settingsPage {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pageHeader {
+  .breadcrumb {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: $color-primary;
+    letter-spacing: 0.08em;
+  }
+
+  .title {
+    font-size: 1.625rem;
+    font-weight: 700;
+    color: $color-text-primary;
+    margin-top: 0.2rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+    color: $color-text-secondary;
+    margin-top: 0.25rem;
+  }
+}
+
+.settingsForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settingsCard {
+  @include surface-card;
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.25rem 1.5rem;
+  background-color: #FCFAFA;
+  border-bottom: 1px solid $color-border;
+
+  .iconBurgundy {
+    color: $color-primary;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $color-text-primary;
+  }
+
+  p {
+    font-size: 0.8125rem;
+    color: $color-text-muted;
+    margin-top: 0.15rem;
+  }
+}
+
+.cardBody {
+  padding: 1.5rem;
+}
+
+.checkboxList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.checkItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    margin-top: 0.15rem;
+    accent-color: $color-primary;
+    cursor: pointer;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    strong {
+      font-size: 0.875rem;
+      color: $color-text-primary;
+    }
+
+    span {
+      font-size: 0.8125rem;
+      color: $color-text-secondary;
+    }
+  }
+}
+
+.gridTwo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $color-text-primary;
+  }
+
+  input {
+    padding: 0.625rem 0.875rem;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    font-size: 0.875rem;
+    background-color: $color-surface;
+
+    &:focus {
+      border-color: $color-primary;
+    }
+  }
+}
+
+.databaseActions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dbActionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: $radius-md;
+  background-color: #FAF8F9;
+  border: 1px solid $color-border-subtle;
+  gap: 1rem;
+
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  strong {
+    font-size: 0.875rem;
+    color: $color-text-primary;
+    display: block;
+  }
+
+  p {
+    font-size: 0.8125rem;
+    color: $color-text-secondary;
+    margin-top: 0.2rem;
+  }
+}
+
+.saveBar {
+  display: flex;
+  justify-content: flex-end;
+}

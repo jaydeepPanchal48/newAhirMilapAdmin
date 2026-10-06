@@ -1,0 +1,86 @@
+// ==========================================
+// AhirMilap Admin Panel - Design Tokens
+// ==========================================
+
+// Brand Colors (Derived from AhirMilap Website)
+$color-primary: #7E1D2B;          // Burgundy
+$color-primary-dark: #5C121D;     // Deep Burgundy
+$color-primary-light: #9B2C3B;    // Medium Burgundy
+$color-primary-tint: #FDF2F4;     // Soft Tint Background
+$color-primary-hover: #8D1F30;
+$color-primary-gradient: linear-gradient(135deg, #7E1D2B 0%, #9B2C3B 100%);
+$color-primary-subtle: rgba(126, 29, 43, 0.08);
+
+$color-accent: #D4AF37;           // Warm Gold
+$color-accent-light: #F7E7A9;
+$color-accent-dark: #B38F24;
+$color-accent-subtle: rgba(212, 175, 55, 0.15);
+
+// SaaS Neutral Palette
+$color-sidebar-bg: #1A1318;       // Deep Burgundy Charcoal for Premium Sidebar
+$color-sidebar-hover: #2A1F26;
+$color-sidebar-border: rgba(255, 255, 255, 0.08);
+$color-sidebar-text: #E5DCE0;
+$color-sidebar-muted: #9E8F97;
+
+$color-bg-app: #F7F5F6;          // Subtle warm gray for dashboard background
+$color-surface: #FFFFFF;         // White cards
+$color-surface-hover: #FAFAFA;
+$color-border: #E8E2E4;          // Clean border line
+$color-border-subtle: #F0ECEE;
+
+$color-text-primary: #1C1917;    // Deep Charcoal / Near Black
+$color-text-secondary: #57534E;  // Secondary Text
+$color-text-muted: #8C827A;      // Muted / Labels
+$color-text-white: #FFFFFF;
+
+// Functional States
+$color-success: #16A34A;
+$color-success-bg: #DCFCE7;
+$color-success-border: #BBF7D0;
+
+$color-warning: #D97706;
+$color-warning-bg: #FEF3C7;
+$color-warning-border: #FDE68A;
+
+$color-danger: #DC2626;
+$color-danger-bg: #FEE2E2;
+$color-danger-border: #FECACA;
+
+$color-info: #0284C7;
+$color-info-bg: #E0F2FE;
+$color-info-border: #BAE6FD;
+
+$color-purple: #7C3AED;
+$color-purple-bg: #F3E8FF;
+
+// Typography
+$font-family-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-heading: 'Outfit', sans-serif;
+
+// Radius Tokens
+$radius-xs: 4px;
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+$radius-xl: 20px;
+$radius-full: 9999px;
+
+// Shadows (Subtle, Modern SaaS depth)
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-sm: 0 2px 4px rgba(28, 25, 23, 0.04), 0 1px 2px rgba(28, 25, 23, 0.02);
+$shadow-md: 0 4px 12px rgba(28, 25, 23, 0.06), 0 1px 3px rgba(28, 25, 23, 0.04);
+$shadow-lg: 0 12px 24px -4px rgba(28, 25, 23, 0.08), 0 4px 8px -2px rgba(28, 25, 23, 0.04);
+$shadow-xl: 0 20px 32px -6px rgba(28, 25, 23, 0.12), 0 8px 16px -4px rgba(28, 25, 23, 0.06);
+
+// Transitions
+$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+
+// Z-index hierarchy
+$z-dropdown: 100;
+$z-sticky: 200;
+$z-drawer: 300;
+$z-modal: 400;
+$z-toast: 500;

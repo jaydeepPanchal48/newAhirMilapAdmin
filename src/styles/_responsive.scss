@@ -1,0 +1,44 @@
+// Breakpoints
+$bp-xs: 375px;
+$bp-sm: 576px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+$bp-2xl: 1440px;
+
+// Media Queries
+@mixin mobile-sm {
+  @media (max-width: ($bp-xs)) {
+    @content;
+  }
+}
+
+@mixin mobile {
+  @media (max-width: ($bp-md - 1px)) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: $bp-md) and (max-width: ($bp-lg - 1px)) {
+    @content;
+  }
+}
+
+@mixin tablet-down {
+  @media (max-width: ($bp-lg - 1px)) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: $bp-lg) {
+    @content;
+  }
+}
+
+@mixin desktop-xl {
+  @media (min-width: $bp-xl) {
+    @content;
+  }
+}

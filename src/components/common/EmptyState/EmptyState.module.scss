@@ -1,0 +1,36 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.emptyContainer {
+  @include flex-center;
+  @include flex-column;
+  padding: 4rem 1.5rem;
+  text-align: center;
+  background-color: $color-surface;
+  border-radius: $radius-lg;
+}
+
+.iconCircle {
+  @include flex-center;
+  width: 72px;
+  height: 72px;
+  border-radius: $radius-full;
+  background-color: $color-primary-tint;
+  color: $color-primary;
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: $color-text-secondary;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
