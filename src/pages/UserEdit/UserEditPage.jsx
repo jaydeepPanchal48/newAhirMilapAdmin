@@ -49,15 +49,20 @@ export default function UserEditPage({ isNew = false }) {
     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400'
   );
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(!isNew);
 
   useEffect(() => {
-    if (!isNew && id) {
-      const existing = userService.getUserById(id);
-      if (existing) {
+    if (isNew || !id) return undefined;
+    const controller = new AbortController();
+
+    const loadRegistration = async () => {
+      setLoading(true);
+      try {
+        const existing = await userService.getRegistrationById(id, { signal: controller.signal });
         setFormData({
           fullName: existing.fullName || '',
           gender: existing.gender || 'Male',
-          dateOfBirth: existing.dateOfBirth || '',
+          dateOfBirth: existing.dateOfBirth ? existing.dateOfBirth.slice(0, 10) : '',
           mobileNumber: existing.mobileNumber || '',
           emailAddress: existing.emailAddress || '',
           currentCity: existing.currentCity || '',
@@ -78,12 +83,19 @@ export default function UserEditPage({ isNew = false }) {
           notes: existing.notes || '',
         });
         setPhotoPreview(existing.profilePhoto || '');
-      } else {
-        toast.error(`User ${id} not found.`);
-        navigate('/users');
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          toast.error(error.message || `Unable to load profile ${id}.`);
+          navigate('/users', { replace: true });
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
-    }
-  }, [id, isNew]);
+    };
+
+    loadRegistration();
+    return () => controller.abort();
+  }, [id, isNew, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -105,7 +117,7 @@ export default function UserEditPage({ isNew = false }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.fullName || !formData.dateOfBirth || !formData.mobileNumber || !formData.currentCity || !formData.education || !formData.occupation) {
@@ -124,7 +136,7 @@ export default function UserEditPage({ isNew = false }) {
         toast.success(`Matrimonial profile ${created.id} created successfully!`);
         navigate(`/users/${created.id}`);
       } else {
-        const updated = userService.updateUser(id, {
+        await userService.updateRegistration(id, {
           ...formData,
           profilePhoto: photoPreview,
         });
@@ -132,11 +144,15 @@ export default function UserEditPage({ isNew = false }) {
         navigate(`/users/${id}`);
       }
     } catch (err) {
-      toast.error('Failed to save profile. Please check the inputs.');
+      toast.error(err.message || 'Failed to save profile. Please check the inputs.');
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return <div className={styles.editPage}>Loading profile...</div>;
+  }
 
   return (
     <div className={styles.editPage}>

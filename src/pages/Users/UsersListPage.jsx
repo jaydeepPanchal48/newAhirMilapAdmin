@@ -2,23 +2,20 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Search,
-  Filter,
   X,
   UserPlus,
   Download,
   Eye,
   Edit,
   Trash2,
-  CheckCircle2,
+  LoaderCircle,
   Clock,
+  CheckCircle2,
   UserCheck,
   UserX,
   AlertTriangle,
   RotateCcw,
   SlidersHorizontal,
-  ChevronDown,
-  ArrowUpDown,
-  MoreVertical,
 } from 'lucide-react';
 import { userService } from '@/services/userService';
 import { useToast } from '@/context/ToastContext';
@@ -34,7 +31,9 @@ export default function UsersListPage({ presetFilter = 'all' }) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [users, setUsers] = useState([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [refreshVersion, setRefreshVersion] = useState(0);
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
@@ -67,14 +66,42 @@ export default function UsersListPage({ presetFilter = 'all' }) {
   // Delete Confirmation Modal State
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Status Change Confirmation Modal State
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [userToChangeStatus, setUserToChangeStatus] = useState(null);
 
   useEffect(() => {
-    loadUsers();
-  }, []);
+    const controller = new AbortController();
+
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const result = await userService.getRegistrationList({
+          pageNumber: currentPage,
+          pageSize,
+          search: searchQuery.trim(),
+          sortBy,
+          signal: controller.signal,
+        });
+        setUsers(result.users);
+        setTotalRecords(result.totalRecords);
+        if (result.pageSize !== pageSize) setPageSize(result.pageSize);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          setUsers([]);
+          setTotalRecords(0);
+          toast.error(error.message || 'Unable to load registered profiles.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    };
+
+    fetchUsers();
+    return () => controller.abort();
+  }, [currentPage, pageSize, searchQuery, sortBy, refreshVersion]);
 
   // Update preset filter if route changes
   useEffect(() => {
@@ -98,10 +125,7 @@ export default function UsersListPage({ presetFilter = 'all' }) {
   }, [searchParams]);
 
   const loadUsers = () => {
-    setLoading(true);
-    const data = userService.getAllUsers();
-    setUsers(data);
-    setLoading(false);
+    setRefreshVersion((version) => version + 1);
   };
 
   // Distinct cities from data
@@ -113,20 +137,6 @@ export default function UsersListPage({ presetFilter = 'all' }) {
   // Filter and Sort Users
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
-      // Search term matching ID, name, mobile, email, native place
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const matchesName = user.fullName.toLowerCase().includes(q);
-        const matchesId = user.id.toLowerCase().includes(q);
-        const matchesMobile = user.mobileNumber.toLowerCase().includes(q);
-        const matchesEmail = (user.emailAddress || '').toLowerCase().includes(q);
-        const matchesCity = user.currentCity.toLowerCase().includes(q);
-        const matchesNative = (user.nativePlace || '').toLowerCase().includes(q);
-        if (!matchesName && !matchesId && !matchesMobile && !matchesEmail && !matchesCity && !matchesNative) {
-          return false;
-        }
-      }
-
       // Gender
       if (genderFilter !== 'all' && user.gender !== genderFilter) {
         return false;
@@ -153,21 +163,10 @@ export default function UsersListPage({ presetFilter = 'all' }) {
       }
 
       return true;
-    }).sort((a, b) => {
-      if (sortBy === 'newest') return new Date(b.registrationDate) - new Date(a.registrationDate);
-      if (sortBy === 'oldest') return new Date(a.registrationDate) - new Date(b.registrationDate);
-      if (sortBy === 'name_asc') return a.fullName.localeCompare(b.fullName);
-      if (sortBy === 'age_asc') return a.age - b.age;
-      if (sortBy === 'age_desc') return b.age - a.age;
-      return 0;
     });
-  }, [users, searchQuery, genderFilter, verificationFilter, statusFilter, cityFilter, maritalFilter, sortBy]);
+  }, [users, genderFilter, verificationFilter, statusFilter, cityFilter, maritalFilter]);
 
-  // Paginated slice
-  const paginatedUsers = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredUsers.slice(start, start + pageSize);
-  }, [filteredUsers, currentPage, pageSize]);
+  const paginatedUsers = filteredUsers;
 
   // Reset all filters
   const handleClearFilters = () => {
@@ -191,30 +190,21 @@ export default function UsersListPage({ presetFilter = 'all' }) {
     cityFilter !== 'all' ||
     maritalFilter !== 'all';
 
-  // Verification Quick Toggle
-  const handleToggleVerification = (user) => {
-    const nextStatus = user.verificationStatus === 'Verified' ? 'Pending' : 'Verified';
-    userService.updateVerification(user.id, nextStatus);
-    toast.success(`Profile ${user.id} marked as ${nextStatus}.`);
-    loadUsers();
-  };
-
-  // Status Toggle
-  const handleToggleAccountStatus = (user) => {
-    const nextStatus = user.accountStatus === 'Active' ? 'Inactive' : 'Active';
-    userService.updateStatus(user.id, nextStatus);
-    toast.success(`Account for ${user.fullName} is now ${nextStatus}.`);
-    loadUsers();
-  };
-
   // Delete execution
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!userToDelete) return;
-    userService.deleteUser(userToDelete.id);
-    toast.success(`Profile ${userToDelete.id} (${userToDelete.fullName}) has been deleted.`);
-    setDeleteModalOpen(false);
-    setUserToDelete(null);
-    loadUsers();
+    setDeleting(true);
+    try {
+      await userService.deleteRegistration(userToDelete.id);
+      toast.success(`Profile ${userToDelete.id} (${userToDelete.fullName}) has been deleted.`);
+      setDeleteModalOpen(false);
+      setUserToDelete(null);
+      loadUsers();
+    } catch (error) {
+      toast.error(error.message || 'Unable to delete this profile.');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -261,7 +251,7 @@ export default function UsersListPage({ presetFilter = 'all' }) {
           }}
         >
           <span>All Profiles</span>
-          <span className={styles.tabCount}>{users.length}</span>
+          <span className={styles.tabCount}>{totalRecords}</span>
         </button>
 
         <button
@@ -405,7 +395,10 @@ export default function UsersListPage({ presetFilter = 'all' }) {
             <div className={styles.selectFilter}>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setCurrentPage(1);
+                }}
               >
                 <option value="newest">Sort: Newest First</option>
                 <option value="oldest">Sort: Oldest First</option>
@@ -431,15 +424,21 @@ export default function UsersListPage({ presetFilter = 'all' }) {
       </div>
 
       {/* Main Table and Mobile Cards */}
-      <div className={styles.tableCard}>
-        {paginatedUsers.length === 0 ? (
+      <div className={styles.tableCard} aria-busy={loading}>
+        {loading && (
+          <div className={styles.listLoading} role="status">
+            <LoaderCircle size={20} className={styles.loadingIcon} />
+            <span>{users.length ? 'Updating registrations...' : 'Loading registrations...'}</span>
+          </div>
+        )}
+        {paginatedUsers.length === 0 && !loading ? (
           <EmptyState
             title="No Matrimonial Profiles Found"
             description="No user profiles match your active filters or search keyword. Try clearing some filters or searching with different terms."
             actionLabel="Reset Filters"
             onAction={handleClearFilters}
           />
-        ) : (
+        ) : paginatedUsers.length > 0 ? (
           <>
             {/* Desktop & Tablet Data Table */}
             <div className={styles.tableWrapper}>
@@ -563,42 +562,6 @@ export default function UsersListPage({ presetFilter = 'all' }) {
 
                           <button
                             type="button"
-                            className={`${styles.actionIconBtn} ${
-                              user.verificationStatus === 'Verified'
-                                ? styles.activeVerify
-                                : styles.pendingVerify
-                            }`}
-                            onClick={() => handleToggleVerification(user)}
-                            title={
-                              user.verificationStatus === 'Verified'
-                                ? 'Unverify Profile'
-                                : 'Mark Verified'
-                            }
-                          >
-                            <CheckCircle2 size={16} />
-                          </button>
-
-                          <button
-                            type="button"
-                            className={`${styles.actionIconBtn} ${
-                              user.accountStatus === 'Active' ? styles.activeStatus : ''
-                            }`}
-                            onClick={() => handleToggleAccountStatus(user)}
-                            title={
-                              user.accountStatus === 'Active'
-                                ? 'Deactivate Account'
-                                : 'Activate Account'
-                            }
-                          >
-                            {user.accountStatus === 'Active' ? (
-                              <UserCheck size={16} />
-                            ) : (
-                              <UserX size={16} />
-                            )}
-                          </button>
-
-                          <button
-                            type="button"
                             className={`${styles.actionIconBtn} ${styles.deleteBtn}`}
                             onClick={() => {
                               setUserToDelete(user);
@@ -683,18 +646,6 @@ export default function UsersListPage({ presetFilter = 'all' }) {
                     </Link>
                     <button
                       type="button"
-                      className={`btn btn-sm ${
-                        user.verificationStatus === 'Verified' ? 'btn-ghost' : 'btn-gold'
-                      }`}
-                      onClick={() => handleToggleVerification(user)}
-                    >
-                      <CheckCircle2 size={14} />
-                      <span>
-                        {user.verificationStatus === 'Verified' ? 'Unverify' : 'Verify'}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
                       className="btn btn-danger btn-sm"
                       onClick={() => {
                         setUserToDelete(user);
@@ -711,7 +662,7 @@ export default function UsersListPage({ presetFilter = 'all' }) {
             {/* Pagination Controls */}
             <Pagination
               currentPage={currentPage}
-              totalItems={filteredUsers.length}
+              totalItems={totalRecords}
               pageSize={pageSize}
               onPageChange={(p) => setCurrentPage(p)}
               onPageSizeChange={(sz) => {
@@ -720,7 +671,7 @@ export default function UsersListPage({ presetFilter = 'all' }) {
               }}
             />
           </>
-        )}
+        ) : null}
       </div>
 
       {/* Delete Confirmation Modal */}
@@ -757,9 +708,10 @@ export default function UsersListPage({ presetFilter = 'all' }) {
               type="button"
               className="btn btn-danger"
               onClick={confirmDelete}
+              disabled={deleting}
             >
               <Trash2 size={16} />
-              <span>Delete Profile Permanently</span>
+              <span>{deleting ? 'Deleting...' : 'Delete Profile Permanently'}</span>
             </button>
           </div>
         </div>

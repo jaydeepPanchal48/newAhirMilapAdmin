@@ -12,6 +12,7 @@ export default function Pagination({
   const totalPages = Math.ceil(totalItems / pageSize) || 1;
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
+  const availablePageSizes = [...new Set([...pageSizeOptions, pageSize])].sort((a, b) => a - b);
 
   // Generate page numbers array with ellipsis
   const getPageNumbers = () => {
@@ -43,7 +44,7 @@ export default function Pagination({
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
           >
-            {pageSizeOptions.map((opt) => (
+            {availablePageSizes.map((opt) => (
               <option key={opt} value={opt}>
                 {opt} per page
               </option>

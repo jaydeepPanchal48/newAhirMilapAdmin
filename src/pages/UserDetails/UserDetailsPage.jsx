@@ -4,11 +4,6 @@ import {
   ArrowLeft,
   Edit,
   Trash2,
-  CheckCircle2,
-  Clock,
-  UserCheck,
-  UserX,
-  Camera,
   MapPin,
   Calendar,
   Mail,
@@ -21,9 +16,6 @@ import {
   ShieldCheck,
   FileText,
   AlertTriangle,
-  Upload,
-  Sparkles,
-  ExternalLink,
 } from 'lucide-react';
 import { userService } from '@/services/userService';
 import { useToast } from '@/context/ToastContext';
@@ -39,84 +31,41 @@ export default function UserDetailsPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview'); // overview, personal, family, career, preferences, audit
-
-  // Photo modal states
-  const [photoModalOpen, setPhotoModalOpen] = useState(false);
-  const [newPhotoUrl, setNewPhotoUrl] = useState('');
-  const [photoPreview, setPhotoPreview] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const loadUser = async () => {
+      setLoading(true);
+      try {
+        const registration = await userService.getRegistrationById(id, { signal: controller.signal });
+        setUser(registration);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          toast.error(error.message || `Profile ${id} not found.`);
+          navigate('/users', { replace: true });
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    };
     loadUser();
+    return () => controller.abort();
   }, [id]);
 
-  const loadUser = () => {
-    setLoading(true);
-    const u = userService.getUserById(id);
-    if (!u) {
-      toast.error(`Profile ${id} not found.`);
+  const handleDelete = async () => {
+    if (!user) return;
+    setDeleting(true);
+    try {
+      await userService.deleteRegistration(user.id);
+      toast.success(`Profile ${user.id} has been permanently deleted.`);
       navigate('/users', { replace: true });
-      return;
-    }
-    setUser(u);
-    setPhotoPreview(u.profilePhoto);
-    setLoading(false);
-  };
-
-  const handleToggleVerification = () => {
-    const nextStatus = user.verificationStatus === 'Verified' ? 'Pending' : 'Verified';
-    const updated = userService.updateVerification(user.id, nextStatus);
-    setUser(updated);
-    toast.success(`Verification status updated to ${nextStatus}.`);
-  };
-
-  const handleToggleAccountStatus = () => {
-    const nextStatus = user.accountStatus === 'Active' ? 'Inactive' : 'Active';
-    const updated = userService.updateStatus(user.id, nextStatus);
-    setUser(updated);
-    toast.success(`Account status changed to ${nextStatus}.`);
-  };
-
-  const handleDelete = () => {
-    userService.deleteUser(user.id);
-    toast.success(`Profile ${user.id} has been permanently deleted.`);
-    navigate('/users', { replace: true });
-  };
-
-  const handleSavePhoto = (e) => {
-    e.preventDefault();
-    if (!photoPreview) {
-      toast.error('Please provide a photo URL or upload an image.');
-      return;
-    }
-    const updated = userService.updateUser(user.id, { profilePhoto: photoPreview });
-    setUser(updated);
-    setPhotoModalOpen(false);
-    toast.success('Profile photo updated successfully!');
-  };
-
-  const handleRemovePhoto = () => {
-    const defaultPlaceholder =
-      user.gender === 'Female'
-        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400'
-        : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400';
-    const updated = userService.updateUser(user.id, { profilePhoto: defaultPlaceholder });
-    setUser(updated);
-    setPhotoPreview(defaultPlaceholder);
-    setPhotoModalOpen(false);
-    toast.info('Profile photo reset to default placeholder.');
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error(error.message || 'Unable to delete this profile.');
+      setDeleting(false);
     }
   };
 
@@ -152,18 +101,6 @@ export default function UserDetailsPage() {
               alt={user.fullName}
               className={styles.avatarImage}
             />
-            <button
-              type="button"
-              className={styles.photoEditBadge}
-              onClick={() => {
-                setPhotoPreview(user.profilePhoto);
-                setNewPhotoUrl('');
-                setPhotoModalOpen(true);
-              }}
-              title="Change or view profile photo"
-            >
-              <Camera size={15} />
-            </button>
           </div>
 
           <div className={styles.headerInfo}>
@@ -216,39 +153,6 @@ export default function UserDetailsPage() {
             <Edit size={15} />
             <span>Edit Profile</span>
           </Link>
-
-          <button
-            type="button"
-            className={`btn btn-sm ${
-              user.verificationStatus === 'Verified' ? 'btn-secondary' : 'btn-gold'
-            }`}
-            onClick={handleToggleVerification}
-          >
-            <CheckCircle2 size={15} />
-            <span>
-              {user.verificationStatus === 'Verified'
-                ? 'Unverify Profile'
-                : 'Verify Profile'}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={handleToggleAccountStatus}
-          >
-            {user.accountStatus === 'Active' ? (
-              <>
-                <UserX size={15} />
-                <span>Deactivate</span>
-              </>
-            ) : (
-              <>
-                <UserCheck size={15} />
-                <span>Activate</span>
-              </>
-            )}
-          </button>
 
           <button
             type="button"
@@ -613,77 +517,6 @@ export default function UserDetailsPage() {
         )}
       </div>
 
-      {/* 9. PROFILE PHOTO MANAGEMENT MODAL */}
-      <Modal
-        isOpen={photoModalOpen}
-        onClose={() => setPhotoModalOpen(false)}
-        title="Manage Matrimonial Profile Photo"
-        subtitle={`Update or replace image for ${user.fullName} (${user.id})`}
-      >
-        <form onSubmit={handleSavePhoto} className={styles.photoModalForm}>
-          <div className={styles.previewContainer}>
-            <img
-              src={photoPreview}
-              alt="Preview"
-              className={styles.modalPhotoPreview}
-            />
-          </div>
-
-          <div className={styles.uploadOptions}>
-            <div className={styles.formGroup}>
-              <label htmlFor="photoFileInput">Upload New Photo from Device</label>
-              <input
-                id="photoFileInput"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className={styles.fileInput}
-              />
-            </div>
-
-            <div className={styles.divider}>
-              <span>OR ENTER IMAGE URL</span>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="photoUrlInput">Image URL</label>
-              <input
-                id="photoUrlInput"
-                type="url"
-                placeholder="https://images.unsplash.com/..."
-                value={newPhotoUrl}
-                onChange={(e) => {
-                  setNewPhotoUrl(e.target.value);
-                  if (e.target.value) setPhotoPreview(e.target.value);
-                }}
-              />
-            </div>
-          </div>
-
-          <div className={styles.photoModalActions}>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={handleRemovePhoto}
-            >
-              Reset to Default Placeholder
-            </button>
-            <div className={styles.rightBtns}>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={() => setPhotoModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <button type="submit" className="btn btn-primary btn-sm">
-                Save Photo
-              </button>
-            </div>
-          </div>
-        </form>
-      </Modal>
-
       {/* Delete Confirmation Modal */}
       <Modal
         isOpen={deleteModalOpen}
@@ -718,9 +551,10 @@ export default function UserDetailsPage() {
               type="button"
               className="btn btn-danger"
               onClick={handleDelete}
+              disabled={deleting}
             >
               <Trash2 size={16} />
-              <span>Yes, Delete Profile</span>
+              <span>{deleting ? 'Deleting...' : 'Yes, Delete Profile'}</span>
             </button>
           </div>
         </div>
