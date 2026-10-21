@@ -28,8 +28,7 @@ Open **`http://localhost:5173`** (or the port indicated in your terminal, e.g. `
 
 ## 🔐 Administrator Access
 
-* **Default Email**: `admin@ahirmilap.com`
-* **Default Password**: `admin123`
+This build uses demo-only authentication. Any valid-looking email and password with at least four characters is accepted, and a new browser session is automatically signed in. Do not use this build with real administrator accounts or production data. Replace the client-side authentication and local storage with server-side authentication and authorization before production use.
 
 ---
 
@@ -37,8 +36,8 @@ Open **`http://localhost:5173`** (or the port indicated in your terminal, e.g. `
 
 ### 1. Admin Authentication
 * Split brand panel with AhirMilap logo, value propositions, and trust badges
-* Form with email/password validation, show/hide password toggle, and "Remember workstation"
-* Route guards protecting all administrative endpoints
+* Demo-only email/password form with show/hide password toggle and "Remember workstation"
+* Client-side route guards (not a security boundary)
 
 ### 2. Executive Dashboard
 * **7 Core KPI Cards**: Total Registered, New Registrations, Active Profiles, Pending Verification, Verified Profiles, Grooms (Male), Brides (Female)
@@ -94,3 +93,11 @@ Open **`http://localhost:5173`** (or the port indicated in your terminal, e.g. `
   * Surface Cards: `#FFFFFF`
 * **Styling**: SCSS Modular Architecture (`_variables.scss`, `_mixins.scss`, `_responsive.scss`, `main.scss`)
 * **Responsive Layouts**: Desktop (1920px, 1440px, 1280px), Tablet (1024px, 768px), and Mobile (430px, 390px, 375px) with off-canvas sidebar drawer and responsive card layouts.
+
+---
+
+## 📦 Static Build and Publishing
+
+Run `npm install` and `npm run build`. The deployable static files are generated in `dist/`; the `AhirMilap-Admin-publish.zip` archive contains those files at its root. Upload the contents of `dist/` (or extract the archive) to a static web host configured to serve `index.html` for unknown paths so React Router routes work when loaded directly.
+
+This package is a demo preview, not a production-secure admin system. Authentication is simulated in the browser, profile edits are stored in browser local storage, and registration list operations use the configured API. Do not expose sensitive data or enable real administrative operations until server-side access control and production API configuration are in place.
